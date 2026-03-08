@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Studio Pro Assets - 專業腳本系統 & 地圖商店</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; scroll-padding-top: 80px; }
+        body { 
+            font-family: 'Segoe UI', -apple-system, sans-serif; 
+            line-height: 1.6; overflow-x: hidden; color: #2d3748; background: #0f172a;
+        }
+        
+        /* 導航 */
+        nav { 
+            position: fixed; top: 0; width: 100%; 
+            background: rgba(15,23,42,0.95); backdrop-filter: blur(20px); z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .nav-container { 
+            max-width: 1400px; margin: auto; padding: 0 5%; display: flex; 
+            justify-content: space-between; align-items: center; height: 80px;
+        }
+        .logo { 
+            font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #3b82f6, #10b981);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .nav-links { display: flex; list-style: none; gap: 2rem; }
+        .nav-links a { 
+            color: #e2e8f0; text-decoration: none; font-weight: 500; 
+            position: relative; transition: all 0.3s ease;
+        }
+        .nav-links a::after { 
+            content: ''; position: absolute; bottom: -8px; left: 0; 
+            width: 0; height: 2px; background: linear-gradient(135deg, #3b82f6, #10b981); 
+            transition: width 0.3s ease;
+        }
+        .nav-links a:hover::after { width: 100%; }
+        .nav-links a:hover { color: #3b82f6; }
+        
+        .cart-btn { 
+            position: relative; background: #1e293b; color: white; 
+            padding: 12px 20px; border-radius: 25px; text-decoration: none;
+            transition: all 0.3s; font-weight: 600;
+        }
+        .cart-btn:hover { background: #3b82f6; transform: translateY(-2px); }
+        .cart-count { 
+            position: absolute; top: -8px; right: -8px; background: #ef4444; 
+            color: white; border-radius: 50%; width: 24px; height: 24px; 
+            display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+        }
+
+        /* 英雄區 */
+        .hero { 
+            height: 100vh; background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%);
+            display: flex; align-items: center; justify-content: center; text-align: center; 
+            color: white; position: relative; overflow: hidden;
+        }
+        .hero::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(59,130,246,0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(16,185,129,0.3) 0%, transparent 50%);
+            animation: heroPulse 8s ease-in-out infinite;
+        }
+        @keyframes heroPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
+        }
+        .hero-content { position: relative; z-index: 2; max-width: 800px; padding: 0 5%; }
+        .hero h1 { 
+            font-size: clamp(3rem, 8vw, 5rem); font-weight: 900; margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #ffffff, #e2e8f0); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .hero p { font-size: 1.4rem; margin-bottom: 2.5rem; opacity: 0.95; }
+        .hero-cta { 
+            display: inline-block; background: linear-gradient(135deg, #10b981, #059669); 
+            color: white; padding: 20px 40px; border-radius: 50px; font-size: 1.2rem;
+            font-weight: 700; text-decoration: none; box-shadow: 0 20px 40px rgba(16,185,129,0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .hero-cta:hover { transform: translateY(-8px); box-shadow: 0 30px 60px rgba(16,185,129,0.6); }
+
+        /* 產品分類 */
+        .category-tabs { 
+            background: #1e293b; padding: 4rem 5%; text-align: center;
+        }
+        .tabs { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem; }
+        .tab-btn { 
+            padding: 15px 30px; background: #334155; color: #e2e8f0; border: none;
+            border-radius: 25px; font-weight: 600; cursor: pointer; transition: all 0.3s;
+        }
+        .tab-btn.active { background: linear-gradient(135deg, #3b82f6, #1d4ed8); transform: translateY(-3px); }
+        
+        /* 產品網格 */
+        .products { padding: 6rem 5%; max-width: 1400px; margin: auto; }
+        .products-grid { 
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); 
+            gap: 2rem; margin-top: 3rem;
+        }
+        .product-card { 
+            background: #1e293b; border-radius: 20px; overflow: hidden; 
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(40px); opacity: 0;
+        }
+        .product-card.animate { transform: translateY(0); opacity: 1; }
+        .product-card:hover { 
+            transform: translateY(-20px) scale(1.02); box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+        }
+        .product-thumb { 
+            height: 220px; background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+            position: relative; overflow: hidden;
+        }
+        .product-thumb::before { 
+            content: attr(data-thumb); position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); font-size: 4rem; font-weight: 900;
+            background: rgba(255,255,255,0.2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .product-info { padding: 2rem; }
+        .product-title { font-size: 1.4rem; font-weight: 700; color: #f8fafc; margin-bottom: 0.5rem; }
+        .product-desc { color: #cbd5e1; margin-bottom: 1.5rem; line-height: 1.6; }
+        .product-price { 
+            font-size: 1.8rem; font-weight: 800; color: #10b981; margin-bottom: 1.5rem;
+        }
+        .product-tags { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .tag { background: #475569; color: #e2e8f0; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; }
+        .buy-btn { 
+            width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: white;
+            border: none; padding: 15px; border-radius: 12px; font-weight: 700; font-size: 1.1rem;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .buy-btn:hover { background: linear-gradient(135deg, #059669, #047857); transform: translateY(-2px); }
+
+        /* 購物車抽屜 */
+        .cart-drawer { 
+            position: fixed; top: 0; right: -500px; width: 400px; height: 100vh; 
+            background: #1e293b; box-shadow: -4px 0 20px rgba(0,0,0,0.5); 
+            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); z-index: 2000;
+            overflow-y: auto;
+        }
+        .cart-drawer.open { right: 0; }
+        .cart-header { padding: 2rem; border-bottom: 1px solid #334155; }
+        .cart-item { display: flex; gap: 1rem; padding: 1.5rem 2rem; border-bottom: 1px solid #334155; }
+        .cart-item-thumb { width: 60px; height: 60px; background: #3b82f6; border-radius: 8px; }
+        .cart-item-info h4 { color: #f8fafc; margin-bottom: 0.5rem; }
+        .cart-item-price { color: #10b981; font-weight: 700; }
+        .cart-total { padding: 2rem; font-size: 1.5rem; font-weight: 700; color: #f8fafc; text-align: center; }
+        .checkout-btn { width: 100%; background: #ef4444; color: white; border: none; padding: 18px; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; margin-top: 1rem; }
+
+        /* 響應式 */
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .products-grid { grid-template-columns: 1fr; }
+            .cart-drawer { width: 100%; right: -100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Roblox Studio Pro</div>
+            <ul class="nav-links">
+                <li><a href="#home">首頁</a></li>
+                <li><a href="#systems">腳本系統</a></li>
+                <li><a href="#maps">地圖模板</a></li>
+                <li><a href="#plugins">插件工具</a></li>
+            </ul>
+            <a href="#" class="cart-btn" id="cartToggle">
+                🛒 購物車 <span class="cart-count" id="cartCount">0</span>
+            </a>
+        </div>
+    </nav>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Roblox Studio 專業資產商店</h1>
+            <p>高品質腳本系統 • 完整地圖模板 • 優化機制包<br>加速開發 • 專業品質 • 一鍵導入</p>
+            <a href="#systems" class="hero-cta">瀏覽熱銷產品</a>
+        </div>
+    </section>
+
+    <section class="category-tabs">
+        <div class="tabs">
+            <button class="tab-btn active" data-category="all">全部產品</button>
+            <button class="tab-btn" data-category="systems">腳本系統</button>
+            <button class="tab-btn" data-category="maps">地圖模板</button>
+            <button class="tab-btn" data-category="plugins">插件工具</button>
+        </div>
+    </section>
+
+    <section id="systems" class="products">
+        <h2 style="font-size: 3rem; text-align: center; color: #f8fafc; margin-bottom: 1rem;">熱銷產品</h2>
+        <div class="products-grid">
+            <div class="product-card" data-category="systems" data-thumb="⚙️">
+                <div class="product-thumb"></div>
+                <div class="product-info">
+                    <div class="product-title">完整商店系統 Pro</div>
+                    <div class="product-desc">貨幣系統、商品管理、購物車、結帳、庫存管理、Discord整合</div>
+                    <div class="product-price">HK$299</div>
+                    <div class="product-tags">
+                        <span class="tag">商店系統</span><span class="tag">多人支援</span><span class="tag">優化</span>
+                    </div>
+                    <button class="buy-btn" data-product="store-pro">加入購物車</button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="systems" data-thumb="🏠">
+                <div class="product-thumb"></div>
+                <div class="product-info">
+                    <div class="product-title">房屋系統 Ultimate</div>
+                    <div class="product-desc">房屋購買、裝修、儲存、訪客系統、權限管理、資料持久化</div>
+                    <div class="product-price">HK$249</div>
+                    <div class="product-tags">
+                        <span class="tag">房屋系統</span><span class="tag">資料儲存</span><span class="tag">多人</span>
+                    </div>
+                    <button class="buy-btn" data-product="house-ultimate">加入購物車</button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="maps" data-thumb="🗺️">
+                <div class="product-thumb"></div>
+                <div class="product-info">
+                    <div class="product-title">現代城市地圖包</div>
+                    <div class="product-desc">50+建築物、高品質PBR材質、道路系統、街燈、車輛模型</div>
+                    <div class="product-price">HK$199</div>
+                    <div class="product-tags">
+                        <span class="tag">城市地圖</span><span class="tag">建築物</span><span class="tag">PBR材質</span>
+                    </div>
+                    <button class="buy-btn" data-product="city-map">加入購物車</button>
+                </div>
+            </div>
+
+            <div class="product-card" data-category="plugins" data-thumb="🔧">
+                <div class="product-thumb"></div>
+                <div class="product-info">
+                    <div class="product-title">開發工具插件套裝</div>
+                    <div class="product-desc">地形生成器、路徑尋找、效能監控、自動優化、批量編輯</div>
+                    <div class="product-price">HK$179</div>
+                    <div class="product-tags">
+                        <span class="tag">插件</span><span class="tag">開發工具</span><span class="tag">優化</span>
+                    </div>
+                    <button class="buy-btn" data-product="dev-tools">加入購物車</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 購物車抽屜 -->
+    <div class="cart-drawer" id="cartDrawer">
+        <div class="cart-header">
+            <h3>購物車</h3>
+            <button id="closeCart" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+        </div>
+        <div id="cartItems"></div>
+        <div class="cart-total" id="cartTotal">總計: HK$0</div>
+        <button class="checkout-btn" id="checkoutBtn">前往結帳</button>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+
+    <script>
+        // 全域變數
+        let cart = JSON.parse(localStorage.getItem('robloxCart')) || [];
+        let cartCount = 0;
+
+        // 初始化
+        function init() {
+            updateCartDisplay();
+            setupEventListeners();
+            animateOnScroll();
+        }
+
+        // 事件監聽器
+        function setupEventListeners() {
+            // 分類標籤
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelector('.tab-btn.active').classList.remove('active');
+                    btn.classList.add('active');
+                    filterProducts(btn.dataset.category);
+                });
+            });
+
+            // 購物車按鈕
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                btn.addEventListener('click', addToCart);
+            });
+
+            // 購物車開關
+            document.getElementById('cartToggle').addEventListener('click', toggleCart);
+            document.getElementById('closeCart').addEventListener('click', toggleCart);
+            document.getElementById('overlay').addEventListener('click', toggleCart);
+        }
+
+        // 添加到購物車
+        function addToCart(e) {
+            const productId = e.target.dataset.product;
+            const productCard = e.target.closest('.product-card');
+            const product = {
+                id: productId,
+                title: productCard.querySelector('.product-title').textContent,
+                price: parseInt(productCard.querySelector('.product-price').textContent.replace('HK$', '')),
+                thumb: productCard.dataset.thumb
+            };
+
+            cart.push(product);
+            localStorage.setItem('robloxCart', JSON.stringify(cart));
+            updateCartDisplay();
+            
+            // 動畫反饋
+            e.target.textContent = '已加入!';
+            setTimeout(() => e.target.textContent = '加入購物車', 1500);
+        }
+
+        // 更新購物車顯示
+        function updateCartDisplay() {
+            cartCount = cart.length;
+            document.getElementById('cartCount').textContent = cartCount;
+            
+            const cartItems = document.getElementById('cartItems');
+            const total = cart.reduce((sum, item) => sum + item.price, 0);
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<p style="text-align: center; color: #94a3b8; padding: 2rem;">購物車為空</p>';
+            } else {
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-thumb" style="background: #3b82f6;"></div>
+                        <div style="flex: 1;">
+                            <h4>${item.title}</h4>
+                            <div class="cart-item-price">HK$${item.price}</div>
+                        </div>
+                        <button onclick="removeFromCart('${item.id}')" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer;">移除</button>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('cartTotal').textContent = `總計: HK$${total}`;
+        }
+
+        // 切換購物車
+        function toggleCart() {
+            const drawer = document.getElementById('cartDrawer');
+            const overlay = document.getElementById('overlay');
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        // 過濾產品
+        function filterProducts(category) {
+            document.querySelectorAll('.product-card').forEach(card => {
+                if (category === 'all' || card.dataset.category === category) {
+                    card.style.display = 'block';
+                    setTimeout(() => card.classList.add('animate'), 100);
+                } else {
+                    card.style.display = 'none';
+                    card.classList.remove('animate');
+                }
+            });
+        }
+
+        // 滾動動畫
+        function animateOnScroll() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                    }
+                });
+            });
+            document.querySelectorAll('.product-card').forEach(card => observer.observe(card));
+        }
+
+        // 初始化
+        init();
+
+        // 平滑滾動
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
